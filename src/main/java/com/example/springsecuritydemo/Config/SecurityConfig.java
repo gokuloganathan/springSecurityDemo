@@ -29,17 +29,6 @@ public class SecurityConfig {
     @Bean
     //authentication with user and admin cred
     public UserDetailsService userDetailsService(){
-        /*UserDetails admin = User.withUsername("gokul")
-                .password(encoder.encode("admin")).
-                roles("ADMIN")
-                .build();
-
-        UserDetails user = User.withUsername("user1")
-                .password(encoder.encode("user"))
-                .roles("USER").build();
-
-        */
-        //return new InMemoryUserDetailsManager(admin,user);
         return new UserInfoUserDetailService();            //collects the data from db in the format of userdetails obj from actudal db record
     }
 
@@ -58,12 +47,12 @@ public class SecurityConfig {
                 .authenticated()
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)   //to avoid storing of cookies
                 .and()
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(
-                        authFilter,
-                         UsernamePasswordAuthenticationFilter.class
+                         authFilter,                                       // first filter
+                         UsernamePasswordAuthenticationFilter.class        //after first filter
                 ).build();
     }
 

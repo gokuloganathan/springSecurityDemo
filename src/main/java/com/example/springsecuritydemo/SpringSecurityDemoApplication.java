@@ -26,8 +26,8 @@ public class SpringSecurityDemoApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		System.out.println("Loading data....");
-		authenticationService.addUser(new UserInfo(1,"gokul","gokul@gmail.com","admin123","ROLE_ADMIN"));
+	/*	authenticationService.addUser(new UserInfo(1,"gokul","gokul@gmail.com","admin123","ROLE_ADMIN"));
 		authenticationService.addUser(new UserInfo(2,"user1","user1@gmail.com","user123","ROLE_USER"));
-		System.out.println("ready for authentication...");
+	*/	System.out.println("ready for authentication...");
 	}
 }
