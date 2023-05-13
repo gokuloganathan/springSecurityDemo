@@ -1,23 +1,31 @@
 package com.example.springsecuritydemo.Config;
 
+import com.example.springsecuritydemo.Filter.JwtAuthFilter;
 import com.example.springsecuritydemo.Service.UserInfoUserDetailService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity     /*enabling method level security for working preAuthorize annotation*/
-public class SpringConfig {
+public class SecurityConfig {
 
+    @Autowired
+    private JwtAuthFilter authFilter;
     @Bean
     //authentication with user and admin cred
     public UserDetailsService userDetailsService(){
@@ -32,7 +40,7 @@ public class SpringConfig {
 
         */
         //return new InMemoryUserDetailsManager(admin,user);
-        return new UserInfoUserDetailService();
+        return new UserInfoUserDetailService();            //collects the data from db in the format of userdetails obj from actudal db record
     }
 
     //authorization for end points
@@ -47,9 +55,16 @@ public class SpringConfig {
                 ).permitAll()
                 .and()
                 .authorizeHttpRequests().requestMatchers("/date/**")
-                .authenticated().and()
-                .formLogin().and()
-                .build();
+                .authenticated()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(
+                        authFilter,
+                         UsernamePasswordAuthenticationFilter.class
+                ).build();
     }
 
 
@@ -62,8 +77,13 @@ public class SpringConfig {
     @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        authenticationProvider.setUserDetailsService(userDetailsService());       //setting the authobj's userdetails collected from userinfouserdetailsservice
+        authenticationProvider.setPasswordEncoder(passwordEncoder());           //setting the type of encoder, we are using bCrypt
         return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 }

@@ -17,7 +17,6 @@ public class AuthenticationService {
      public String addUser(UserInfo userInfo){
          userInfo.setPassword(encoder.encode(userInfo.getPassword()));
          repo.save(userInfo);
-
          return "User added to system";
      }
 }
